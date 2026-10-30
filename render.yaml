@@ -1,0 +1,45 @@
+# Maodo Services: the API serves the built frontend on the same origin.
+services:
+  - type: web
+    name: maodo-services
+    runtime: node
+    plan: starter
+    region: frankfurt
+    autoDeployTrigger: commit
+    healthCheckPath: /api/healthz
+    buildCommand: >-
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @workspace/maodo-services run build &&
+      pnpm --filter @workspace/api-server run build
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.1
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: maodo-services-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DIAMANOPAY_SIMULATION
+        value: "false"
+      - key: UPLOADS_DIR
+        value: /var/data/uploads
+    disk:
+      name: order-uploads
+      mountPath: /var/data
+      sizeGB: 1
+
+databases:
+  - name: maodo-services-db
+    databaseName: maodo_services
+    user: maodo
+    plan: 0.1c-256mb
+    region: frankfurt
+    ipAllowList: []

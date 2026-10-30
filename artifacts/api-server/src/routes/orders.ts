@@ -12,7 +12,9 @@ const workspaceRoot = process.cwd().endsWith(path.join("artifacts", "api-server"
   ? path.resolve(process.cwd(), "../..")
   : process.cwd();
 
-const uploadsDir = path.resolve(workspaceRoot, "artifacts/api-server/uploads");
+const uploadsDir = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.resolve(workspaceRoot, "artifacts/api-server/uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

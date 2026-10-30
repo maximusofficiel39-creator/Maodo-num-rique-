@@ -43,7 +43,11 @@ export async function createPayment(params: {
   description: string;
   appBaseUrl: string;
 }): Promise<DiamanoPayCreateChargeResponse & { _debug: { redirectUrl: string; webhookUrl: string; appBase: string } }> {
-  const envAppUrl = (process.env.APP_URL ?? "").replace(/\/$/, "");
+  const envAppUrl = (
+    process.env.APP_URL ??
+    process.env.RENDER_EXTERNAL_URL ??
+    ""
+  ).replace(/\/$/, "");
   const base = envAppUrl || params.appBaseUrl.replace(/\/$/, "");
 
   const redirectUrl = `${base}/payment-result?reference=${encodeURIComponent(params.reference)}`;

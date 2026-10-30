@@ -11,19 +11,24 @@ const INITIAL_SERVICES = [
   { id: "site", name: "Site web simple", price: 50000, delay: "7 jours", description: "Votre présence en ligne", icon: "Globe" },
 ];
 
-const ADMIN_EMAIL = "maodok595@gmail.com";
-const ADMIN_PASSWORD = "782662435";
-
 export async function seed(log: Logger): Promise<void> {
   const existingAdmins = await db.select().from(adminUsersTable).limit(1);
   if (existingAdmins.length === 0) {
-    const { hash, salt } = hashPassword(ADMIN_PASSWORD);
+    const adminEmail = process.env.ADMIN_EMAIL?.trim();
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminEmail || !adminPassword) {
+      throw new Error(
+        "ADMIN_EMAIL and ADMIN_PASSWORD are required to create the initial admin account",
+      );
+    }
+
+    const { hash, salt } = hashPassword(adminPassword);
     await db.insert(adminUsersTable).values({
-      email: ADMIN_EMAIL,
+      email: adminEmail,
       passwordHash: hash,
       salt,
     });
-    log.info({ email: ADMIN_EMAIL }, "Admin account seeded");
+    log.info({ email: adminEmail }, "Admin account seeded");
   }
 
   const existingServices = await db.select().from(servicesTable).limit(1);

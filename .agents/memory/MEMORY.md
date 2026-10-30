@@ -1,0 +1,1 @@
+- [Render pnpm builds](render-pnpm-builds.md) — use Render's native pnpm directly; Replit's read-only Node path can make `corepack enable` fail locally.

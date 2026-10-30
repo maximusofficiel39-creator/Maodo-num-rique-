@@ -27,7 +27,13 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
 function isSimulationMode(): boolean {
   const flag = (process.env.DIAMANOPAY_SIMULATION ?? "").toLowerCase().trim();
   if (flag === "true" || flag === "1" || flag === "yes") return true;
-  if (!process.env.DIAMANOPAY_CLIENT_ID || !process.env.DIAMANOPAY_CLIENT_SECRET) return true;
+  if (flag === "false" || flag === "0" || flag === "no") return false;
+  if (
+    !process.env.DIAMANOPAY_CLIENT_ID ||
+    !process.env.DIAMANOPAY_CLIENT_SECRET
+  ) {
+    return process.env.NODE_ENV !== "production";
+  }
   return false;
 }
 
@@ -329,6 +335,14 @@ router.post("/payment/webhook", async (req: Request, res: Response): Promise<voi
   const rawBody = JSON.stringify(req.body);
   const signature = req.headers["x-diamanopay-signature"] as string | undefined;
   const webhookSecret = process.env.DIAMANOPAY_WEBHOOK_SECRET;
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    (!webhookSecret || !signature)
+  ) {
+    res.status(401).json({ error: "Signature de paiement requise" });
+    return;
+  }
 
   if (webhookSecret && signature) {
     const valid = verifyWebhookSignature(rawBody, signature, webhookSecret);
