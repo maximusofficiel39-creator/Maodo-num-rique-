@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Maodo Services"
+description = "Le portail Maodo Services pour présenter les prestations et formations, gérer les commandes, les paiements et le suivi des visiteurs."
+version = "1.0.0"
+id = "artifacts/maodo-services"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18357
+
+[services.development]
+run = "pnpm --filter @workspace/maodo-services run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/maodo-services", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/maodo-services/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18357"
+BASE_PATH = "/"
